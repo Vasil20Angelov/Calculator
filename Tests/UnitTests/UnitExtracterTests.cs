@@ -1,4 +1,4 @@
-﻿namespace Tests
+﻿namespace UnitTests
 {
     [TestClass]
     public class UnitExtracterTests
@@ -50,6 +50,12 @@
         public void ExtractOperationAtThrows_WhenAtTheGivenPositionIsUnknownOperation()
         {
             Assert.ThrowsException<UndefinedOperationException>(() => extracter.ExtractOperationAt("1.1", 1));
+        }
+
+        [TestMethod]
+        public void test()
+        {
+
         }
     }
 }

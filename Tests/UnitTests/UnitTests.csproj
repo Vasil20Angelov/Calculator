@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SimpleCalculator\SimpleCalculator.csproj" />
+    <ProjectReference Include="..\..\SimpleCalculator\SimpleCalculator.csproj" />
   </ItemGroup>
 
 </Project>

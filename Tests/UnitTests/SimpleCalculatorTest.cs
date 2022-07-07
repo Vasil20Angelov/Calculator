@@ -1,4 +1,4 @@
-﻿namespace Tests
+﻿namespace UnitTests
 {
     [TestClass]
     public class TestCalculator
