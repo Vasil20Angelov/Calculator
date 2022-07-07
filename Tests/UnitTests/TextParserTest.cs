@@ -1,6 +1,6 @@
 using Moq;
 
-namespace Tests
+namespace UnitTests
 {
     [TestClass]
     public class TextParserTest

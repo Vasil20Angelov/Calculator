@@ -3,7 +3,7 @@ using Calculator.Exceptions;
 
 if (args.Length != 1)
 {
-    Console.WriteLine("Invalid input!");
+    Console.WriteLine("The expression must be wrote as 1 string!");
     return;
 }
 
@@ -17,8 +17,7 @@ try
     Console.WriteLine($"Result: {calculator.Calculate(expression)}");
 }
 catch (Exception e) when (
-       e is NoExpressionException
-    || e is WrongInputException
+       e is WrongInputException
     || e is DivideByZeroException
     || e is UndefinedOperationException )
 {
