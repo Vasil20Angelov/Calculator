@@ -14,12 +14,17 @@ SimpleCalculator calculator = new SimpleCalculator();
 try
 {
     Expression expression = parser.Parse(args[0]);
-    Console.WriteLine($"Result: {calculator.Calculate(expression)}");
+    Console.WriteLine($"Result: {calculator.Calculate(expression).ToString("0.#####")}");
 }
 catch (Exception e) when (
        e is WrongInputException
+    || e is OverflowException
     || e is DivideByZeroException
     || e is UndefinedOperationException )
 {
     Console.WriteLine(e.Message);
+}
+catch(FormatException)
+{
+    Console.WriteLine("Invalid input!");
 }

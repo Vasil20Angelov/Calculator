@@ -6,17 +6,24 @@ namespace Calculator
     {
         public double Calculate(Expression expression)
         {
-            return expression.operation switch
+            double result = expression.operation switch
             {
-                Operation.Add      => (double)expression.num1 + expression.num2,
-                Operation.Subsract => (double)expression.num1 - expression.num2,
-                Operation.Multiply => (double)expression.num1 * expression.num2,
+                Operation.Add      => expression.num1 + expression.num2,
+                Operation.Subsract => expression.num1 - expression.num2,
+                Operation.Multiply => expression.num1 * expression.num2,
                 Operation.Divide   => expression.num2 == 0 
                                     ? throw new DivideByZeroException("Cannot divide by zero!") 
-                                    : (double)expression.num1 / expression.num2,
+                                    : expression.num1 / expression.num2,
 
                 _                  => throw new UndefinedOperationException($"The operation is not supported!")
             };
+
+            if (Double.IsInfinity(result))
+            {
+                throw new OverflowException("Cannot calculate so big numbers!");
+            }
+
+            return result;
         }
     }
 }

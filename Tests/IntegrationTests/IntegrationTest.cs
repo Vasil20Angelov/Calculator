@@ -40,19 +40,36 @@ namespace IntergrationTests
         [TestMethod]
         public void RunWithInvalidOperationExpression()
         {
-            RunTest(new List<string> { "1 ^ 2" }, "\'^\' is not a valid operation!");
+            RunTest(new List<string> { "1,3 ^ 2,1" }, "\'^\' is not a valid operation!");
         }
 
         [TestMethod]
         public void RunWithValidExpression()
         {
-            RunTest(new List<string> { "1 + 2" }, "Result: 3");
+            RunTest(new List<string> { "1 + -2,5" }, "Result: -1,5");
         }
 
         [TestMethod]
         public void RunWithDivisorZeroExpression()
         {
             RunTest(new List<string> { "1 / 0" }, "Cannot divide by zero!");
+        }
+
+        [TestMethod]
+        public void FormatUpTo5digitsAfterTheFloatingPoint()
+        {
+            RunTest(new List<string> { "1,12345678 + 0,111111111" }, "Result: 1,23457");
+        }
+
+        [TestMethod]
+        public void RunWithTooBigNumber()
+        {
+            string tooBigNum = "999999999999999999999999999999999999999999999999999999999999999999999999999999999" +
+                "999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999" +
+                "999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999" +
+                "999999999999999999999999999999999999";
+
+            RunTest(new List<string> { $"{tooBigNum} / 5" }, "The entered numbers are too big!");
         }
     }
 }

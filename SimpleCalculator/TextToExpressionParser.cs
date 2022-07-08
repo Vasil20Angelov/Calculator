@@ -13,18 +13,20 @@ namespace Calculator
 
             return Split(input.Trim());
         }
+
         private Expression Split(string input)
         {
             int pos = 0;
 
-            int number1 = extracter.ExtractNumberAt(input, pos++);
+            double number1 = extracter.ExtractNumberAt(input, ref pos);
+
             SkipWhiteSpace(input, ref pos);
 
             Operation operation = extracter.ExtractOperationAt(input, pos++);
 
             SkipWhiteSpace(input, ref pos);
 
-            int number2 = extracter.ExtractNumberAt(input, pos++);
+            double number2 = extracter.ExtractNumberAt(input, ref pos);
 
             AssertEndOfTheStringIsReached(pos, input.Length);
 

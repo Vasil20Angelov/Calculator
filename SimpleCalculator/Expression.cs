@@ -9,10 +9,10 @@
     }
     public struct Expression
     {
-        public readonly int num1;
-        public readonly int num2;
+        public readonly double num1;
+        public readonly double num2;
         public readonly Operation operation;
-        public Expression(int num1, Operation operation, int num2)
+        public Expression(double num1, Operation operation, double num2)
         {
             this.num1 = num1;
             this.num2 = num2;

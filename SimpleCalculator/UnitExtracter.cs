@@ -4,12 +4,36 @@ namespace Calculator
 {
     public class UnitExtracter
     {
-        public virtual int ExtractNumberAt(string input, int pos)
+        public virtual double ExtractNumberAt(string input, ref int pos)
         {
-            if (pos >= input.Length || !IsNumber(input[pos]))
-                throw new WrongInputException("Invalid input!");
+            string number = "";
+            bool containsFloatingPoint = false;
 
-            return ConvertCharToInt(input[pos]);
+            if (pos < input.Length && IsSign(input[pos]))
+            {
+                number += input[pos];
+                pos++;
+            }
+
+            while (pos < input.Length)
+            {
+                if (IsFloatingPoint(input[pos]))
+                {
+                    if (containsFloatingPoint)                   
+                        break;                    
+                    else                   
+                        containsFloatingPoint = true;                   
+                }            
+                else if (!IsNumber(input[pos]))
+                {
+                    break;
+                }
+
+                number += input[pos];
+                pos++;
+            }
+
+            return ConvertToDouble(number);
         }
 
         public virtual Operation ExtractOperationAt(string input, int pos)
@@ -24,8 +48,20 @@ namespace Calculator
             return operation;
         }
 
-        private int ConvertCharToInt(char c) => c - '0';
+        private double ConvertToDouble(string input)
+        {
+            double number = Double.Parse(input);
+
+            if (double.IsInfinity(number))
+            {
+                throw new OverflowException("The entered numbers are too big!");
+            }
+
+            return number;
+        }
+        private bool IsFloatingPoint(char c) => c == ',';
         private bool IsNumber(char c) => c >= '0' && c <= '9';
+        private bool IsSign(char c) => c == '+' || c == '-';
         private bool IsValidOperation(Operation operation)
         {
             foreach (Operation op in Enum.GetValues(typeof(Operation)))
