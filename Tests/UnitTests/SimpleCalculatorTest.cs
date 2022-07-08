@@ -33,7 +33,7 @@
         public void CalculateWhenDivisorIsZero()
         {
             Assert.ThrowsException<DivideByZeroException>(() =>
-                                        calculator.Calculate(new Expression(5, (Operation)'/', 0)));
+                                        calculator.Calculate(new Expression(5, Operation.Divide, 0)));
         }
 
         [TestMethod]
@@ -41,6 +41,13 @@
         {
             Assert.ThrowsException<UndefinedOperationException> (() =>
                                         calculator.Calculate(new Expression(5, (Operation)'%', 0)));
+        }
+
+        [TestMethod]
+        public void CalculateTooBigNumbers()
+        {
+            Assert.ThrowsException<OverflowException>(() =>
+                                   calculator.Calculate(new Expression(double.MaxValue, Operation.Add, double.MaxValue)));
         }
     }
 }
