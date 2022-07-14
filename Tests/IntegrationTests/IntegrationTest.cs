@@ -34,7 +34,7 @@ namespace IntergrationTests
         [TestMethod]
         public void RunWithInvalidExpression()
         {
-            RunTest(new List<string> { "1 + 2 4" }, "Invalid input!");
+            RunTest(new List<string> { "1 + " }, "Invalid input!");
         }
 
         [TestMethod]
@@ -70,6 +70,18 @@ namespace IntergrationTests
                 "999999999999999999999999999999999999";
 
             RunTest(new List<string> { $"{tooBigNum} / 5" }, "The entered numbers are too big!");
+        }
+
+        [TestMethod]
+        public void RunWithLongerExpression()
+        {
+            RunTest(new List<string> { "6 + 5 - 2 + 1" }, "Result: 10");
+        }
+
+        [TestMethod]
+        public void RunWithLongerExpressionWithDifferentOperatorPriorities()
+        {
+            RunTest(new List<string> { "6 + 5 * 2 + 4 / 2 - 1 *-2 / 4 " }, "Result: 18,5");
         }
     }
 }

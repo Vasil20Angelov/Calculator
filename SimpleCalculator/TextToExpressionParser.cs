@@ -1,6 +1,8 @@
 ﻿using Calculator.Exceptions;
+using Calculator.ExpressionBuilders;
+using Calculator.Operations;
 
-namespace Calculator
+namespace Parser
 {
     public class TextToExpressionParser
     {
@@ -18,19 +20,37 @@ namespace Calculator
         {
             int pos = 0;
 
-            double number1 = extracter.ExtractNumberAt(input, ref pos);
+            List<IExpressionPart> expr = new List<IExpressionPart>();
+
+            ExtractOperand(input, ref pos, ref expr);
+            AssertNotReachedEndOfString(input, pos);
+
+            while (pos < input.Length)
+            {
+                ExtractOperator(input, ref pos, ref expr);
+
+                ExtractOperand(input, ref pos, ref expr);
+            }
+
+            return new Expression(expr);
+        }
+
+        private void ExtractOperand(string input, ref int pos, ref List<IExpressionPart> expr)
+        {
+            double number = extracter.ExtractNumberAt(input, ref pos);
+            Operand operand = new Operand(number);
+            expr.Add(operand);
 
             SkipWhiteSpace(input, ref pos);
+        }
 
-            Operation operation = extracter.ExtractOperationAt(input, pos++);
+        private void ExtractOperator(string input, ref int pos, ref List<IExpressionPart> expr)
+        {
+            IOperation operation = extracter.ExtractOperationAt(input, pos++);
+            Operator opr = new Operator(operation);
+            expr.Add(opr);
 
             SkipWhiteSpace(input, ref pos);
-
-            double number2 = extracter.ExtractNumberAt(input, ref pos);
-
-            AssertEndOfTheStringIsReached(pos, input.Length);
-
-            return new Expression(number1, operation, number2);
         }
 
         private void SkipWhiteSpace(string input, ref int pos)
@@ -39,10 +59,11 @@ namespace Calculator
                 ++pos;
         }
 
-        private void AssertEndOfTheStringIsReached(int pos, int strLength)
+        private void AssertNotReachedEndOfString(string input, int pos)
         {
-            if (pos < strLength)
+            if (input.Length <= pos)
                 throw new WrongInputException("Invalid input!");
         }
+
     }
 }
