@@ -1,0 +1,134 @@
+﻿namespace UnitTests
+{
+    [TestClass]
+    public class InfixToPostfixConverterTest
+    {
+        InfixToPostfixConverter converter = new InfixToPostfixConverter();
+
+        [TestMethod]
+        public void ConvertProducesCorrectExpression_WhenTheGivenExpressionContains1Operation()
+        {
+            // Arange
+
+            // 1+5
+            List<IExpressionPart> infParts = new()
+            {
+                new Operand(1),
+                new Operator(new Addition()),
+                new Operand(5)
+            };
+
+            List<IExpressionPart> pfParts = new()
+            {
+                new Operand(1), new Operand(5),
+                new Operator(new Addition())
+            };
+
+            Expression infixExpr = new Expression(infParts);
+            Expression expected = new Expression(pfParts);
+
+            // Act
+            Expression expression = converter.Convert(infixExpr);
+
+            // Assert
+            Assert.That.ExpressionsAreEqual(expected, expression);
+        }
+
+
+        [TestMethod]
+        public void ConvertProducesCorrectExpression_WhenTheGivenExpressionContainsMoreThan1Operation()
+        {
+            // Arange
+
+            // 1+5-3-2
+            List<IExpressionPart> infixParts = new()
+            {
+                new Operand(1), new Operator(new Addition()),
+                new Operand(5), new Operator(new Substraction()),
+                new Operand(3), new Operator(new Substraction()),
+                new Operand(2)
+            };
+
+            List<IExpressionPart> pfParts = new()
+            {
+                new Operand(1), new Operand(5), new Operator(new Addition()),
+                new Operand(3), new Operator(new Substraction()),
+                new Operand(2), new Operator(new Substraction())
+            };
+
+            Expression infExpression = new Expression(infixParts);
+            Expression expected = new Expression(pfParts);
+
+            // Act
+            Expression expression = converter.Convert(infExpression);
+
+            // Assert
+            Assert.That.ExpressionsAreEqual(expected, expression);
+        }
+
+        [TestMethod]
+        public void ConvertProducesCorrectExpression_WhenTheOperatorsAreWithDifferentPriority()
+        {
+            // Arange
+
+            // 1+5*3-2/2
+            List<IExpressionPart> infixParts = new()
+            {
+                new Operand(1), new Operator(new Addition()),
+                new Operand(5), new Operator(new Multiplication()),
+                new Operand(3), new Operator(new Substraction()),
+                new Operand(2), new Operator(new Division()),
+                new Operand(2)
+            };
+                
+            List<IExpressionPart> pfParts = new()
+            {
+                new Operand(1), new Operand(5), new Operand(3),
+                new Operator(new Multiplication()),
+                new Operator(new Addition()),
+                new Operand(2), new Operand(2),
+                new Operator(new Division()),
+                new Operator(new Substraction())
+            };
+
+            Expression infExpression = new Expression(infixParts);
+            Expression expected = new Expression(pfParts);
+
+            // Act
+            Expression expression = converter.Convert(infExpression);
+
+            // Assert
+            Assert.That.ExpressionsAreEqual(expected, expression);
+        }
+
+        [TestMethod]
+        public void ConvertThrows_WhenTheGivenExpressionIsNotInInfixNotation()
+        {
+            List<IExpressionPart> parts = new()
+            {
+                new Operand(1), new Operand(2), new Operand(5),
+                new Operator(new Multiplication()),            
+                new Operator(new Addition())
+            };
+
+            Expression expression = new Expression(parts);
+
+            Assert.ThrowsException<WrongInputException>(() => converter.Convert(expression));
+        }
+
+        [TestMethod]
+        public void ConvertThrows_WhenTheGivenExpressionIsNotCompletedExpression()
+        {
+            List<IExpressionPart> parts = new()
+            {
+                new Operand(1), new Operator(new Multiplication()),
+                new Operand(2), new Operator(new Addition()),
+                new Operand(5), new Operator(new Addition())
+            };
+
+            Expression expression = new Expression(parts);
+
+            Assert.ThrowsException<WrongInputException>(() => converter.Convert(expression));
+        }
+    }
+}

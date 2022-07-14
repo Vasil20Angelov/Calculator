@@ -1,5 +1,7 @@
-﻿using Calculator;
+﻿using Parser;
+using Calculator;
 using Calculator.Exceptions;
+using Calculator.ExpressionBuilders;
 
 if (args.Length != 1)
 {
@@ -9,12 +11,15 @@ if (args.Length != 1)
 
 UnitExtracter unitExtracter = new UnitExtracter();
 TextToExpressionParser parser = new TextToExpressionParser(unitExtracter);
+InfixToPostfixConverter converter = new InfixToPostfixConverter();
 SimpleCalculator calculator = new SimpleCalculator();
 
 try
 {
     Expression expression = parser.Parse(args[0]);
-    Console.WriteLine($"Result: {calculator.Calculate(expression).ToString("0.#####")}");
+    Expression postfixExpr = converter.Convert(expression);
+
+    Console.WriteLine($"Result: {calculator.Calculate(postfixExpr).ToString("0.#####")}");
 }
 catch (Exception e) when (
        e is WrongInputException

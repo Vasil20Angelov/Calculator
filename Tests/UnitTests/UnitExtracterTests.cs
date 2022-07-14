@@ -75,29 +75,29 @@
         [TestMethod]
         public void ExtractOperationAtReturnsOperationAdd()
         {
-            Operation operation = extracter.ExtractOperationAt("2+3", 1);
-            Assert.AreEqual(Operation.Add, operation);
+            IOperation operation = extracter.ExtractOperationAt("2+3", 1);
+            Assert.IsInstanceOfType(operation, typeof(Addition));
         }
 
         [TestMethod]
         public void ExtractOperationAtReturnsOperationSubstract()
         {
-            Operation operation = extracter.ExtractOperationAt("/-/", 1);
-            Assert.AreEqual(Operation.Subsract, operation);
+            IOperation operation = extracter.ExtractOperationAt("/-/", 1);
+            Assert.IsInstanceOfType(operation, typeof(Substraction));
         }
 
         [TestMethod]
         public void ExtractOperationAtReturnsOperationMultiply()
         {
-            Operation operation = extracter.ExtractOperationAt("qw*", 2);
-            Assert.AreEqual(Operation.Multiply, operation);
+            IOperation operation = extracter.ExtractOperationAt("qw*", 2);
+            Assert.IsInstanceOfType(operation, typeof(Multiplication));
         }
 
         [TestMethod]
         public void ExtractOperationAtReturnsOperationDivide()
         {
-            Operation operation = extracter.ExtractOperationAt("/", 0);
-            Assert.AreEqual(Operation.Divide, operation);
+            IOperation operation = extracter.ExtractOperationAt("/", 0);
+            Assert.IsInstanceOfType(operation, typeof(Division));
         }
 
         [TestMethod]

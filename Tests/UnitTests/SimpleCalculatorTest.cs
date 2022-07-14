@@ -2,52 +2,58 @@
 {
     [TestClass]
     public class TestCalculator
-    {
+    {    
         SimpleCalculator calculator = new SimpleCalculator();
 
         [TestMethod]
-        public void CalculateAddition()
+        public void CalculatePostfixExpression()
         {
-            Assert.AreEqual(3, calculator.Calculate(new Expression(2, Operation.Add, 1)));
+            // 2 + 4*2 - 3*6/2
+            List<IExpressionPart> expressionParts = new List<IExpressionPart>
+            {
+                new Operand(2), new Operand(4), new Operand(2),
+                new Operator(new Multiplication()), 
+                new Operator(new Addition()),
+                new Operand(3), new Operand(6), new Operand(2),
+                new Operator(new Division()),
+                new Operator(new Multiplication()), 
+                new Operator(new Substraction())
+            };
+            Expression postfixExpression = new Expression(expressionParts);
+
+            Assert.AreEqual(1, calculator.Calculate(postfixExpression));
         }
 
         [TestMethod]
-        public void CalculateSubstraction()
+        public void CalculatePostfixExpressionThrows_WhenTheGivenExpressionIsInvalid()
         {
-            Assert.AreEqual(0, calculator.Calculate(new Expression(3, Operation.Subsract, 3)));
-        }
+            // 1 + 4*2 - 3*/2
+            List<IExpressionPart> expressionParts = new List<IExpressionPart>
+            {
+                new Operand(1), new Operand(4), new Operand(2),
+                new Operator(new Multiplication()), 
+                new Operator(new Addition()),
+                new Operand(3), new Operand(2),
+                new Operator(new Division()), 
+                new Operator(new Multiplication()), 
+                new Operator(new Substraction())
+            };
+            Expression postfixExpression = new Expression(expressionParts);
 
-        [TestMethod]
-        public void CalculateMultiplication()
-        {
-            Assert.AreEqual(10, calculator.Calculate(new Expression(2, Operation.Multiply, 5)));
-        }
-
-        [TestMethod]
-        public void CalculateDivison()
-        {
-            Assert.AreEqual(2.5, calculator.Calculate(new Expression(5, Operation.Divide, 2)));
-        }
-
-        [TestMethod]
-        public void CalculateWhenDivisorIsZero()
-        {
-            Assert.ThrowsException<DivideByZeroException>(() =>
-                                        calculator.Calculate(new Expression(5, Operation.Divide, 0)));
-        }
-
-        [TestMethod]
-        public void CalculateNotSupportedOperation()
-        {
-            Assert.ThrowsException<UndefinedOperationException> (() =>
-                                        calculator.Calculate(new Expression(5, (Operation)'%', 0)));
+            Assert.ThrowsException<WrongInputException>(()=> calculator.Calculate(postfixExpression));
         }
 
         [TestMethod]
         public void CalculateTooBigNumbers()
         {
-            Assert.ThrowsException<OverflowException>(() =>
-                                   calculator.Calculate(new Expression(double.MaxValue, Operation.Add, double.MaxValue)));
+            List<IExpressionPart> expressionParts = new List<IExpressionPart>
+            {
+                new Operand(Double.MaxValue), new Operand(Double.MaxValue),
+                new Operator(new Multiplication())
+            };
+            Expression postfixExpression = new Expression(expressionParts);
+
+            Assert.ThrowsException<OverflowException>(() => calculator.Calculate(postfixExpression));
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Calculator.Exceptions;
+using Calculator.Operations;
 
-namespace Calculator
+namespace Parser
 {
     public class UnitExtracter
     {
@@ -36,16 +37,14 @@ namespace Calculator
             return ConvertToDouble(number);
         }
 
-        public virtual Operation ExtractOperationAt(string input, int pos)
+        public virtual IOperation ExtractOperationAt(string input, int pos)
         {
             if (pos >= input.Length)
                 throw new WrongInputException("Invalid input!");
 
-            Operation operation = (Operation)input[pos];
-            if (!IsValidOperation(operation))
-                throw new UndefinedOperationException($"\'{input[pos]}\' is not a valid operation!");
+            OperationFactory factory = new OperationFactory();
 
-            return operation;
+            return factory.Create(input[pos]);
         }
 
         private double ConvertToDouble(string input)
@@ -62,13 +61,5 @@ namespace Calculator
         private bool IsFloatingPoint(char c) => c == ',';
         private bool IsNumber(char c) => c >= '0' && c <= '9';
         private bool IsSign(char c) => c == '+' || c == '-';
-        private bool IsValidOperation(Operation operation)
-        {
-            foreach (Operation op in Enum.GetValues(typeof(Operation)))
-                if (operation == op)
-                    return true;
-
-            return false;
-        }
     }
 }

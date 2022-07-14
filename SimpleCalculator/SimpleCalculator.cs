@@ -1,4 +1,5 @@
 ﻿using Calculator.Exceptions;
+using Calculator.ExpressionBuilders;
 
 namespace Calculator
 {
@@ -6,24 +7,60 @@ namespace Calculator
     {
         public double Calculate(Expression expression)
         {
-            double result = expression.operation switch
+            Stack<Operand> operands = new Stack<Operand>();
+
+            for(int i = 0; i < expression.Count; i++)
             {
-                Operation.Add      => expression.num1 + expression.num2,
-                Operation.Subsract => expression.num1 - expression.num2,
-                Operation.Multiply => expression.num1 * expression.num2,
-                Operation.Divide   => expression.num2 == 0 
-                                    ? throw new DivideByZeroException("Cannot divide by zero!") 
-                                    : expression.num1 / expression.num2,
+                if (expression[i] is Operand)
+                {
+                    Operand value = (Operand)expression[i];
+                    operands.Push(value);
+                }
+                else
+                {
+                    AssertStackContainsAtleast2Numbers(operands);
 
-                _                  => throw new UndefinedOperationException($"The operation is not supported!")
-            };
+                    Operand num2 = operands.Pop();
+                    Operand num1 = operands.Pop();
+                    Operator op = (Operator)expression[i];
 
-            if (Double.IsInfinity(result))
+                    Operand result = Calculate(num1, op, num2);
+
+                    operands.Push(result);
+                }
+            }
+
+            AssertOnly1NumberIsInTheStack(operands);
+
+            return operands.Peek().Value;
+        }
+
+        private Operand Calculate(Operand operand1, Operator operation, Operand operand2)
+        {
+            Operand result = operation.Apply(operand1, operand2);
+
+            if (Double.IsInfinity(result.Value))
             {
                 throw new OverflowException("Cannot calculate so big numbers!");
             }
 
             return result;
+        }
+
+        private void AssertOnly1NumberIsInTheStack(Stack<Operand> stack)
+        {
+            if (stack.Count != 1)
+            {
+                throw new WrongInputException("The given expression is invalid!");
+            }    
+        }
+
+        private void AssertStackContainsAtleast2Numbers(Stack<Operand> stack)
+        {
+            if (stack.Count < 2)
+            {
+                throw new WrongInputException("The given expression is invalid!");
+            }
         }
     }
 }

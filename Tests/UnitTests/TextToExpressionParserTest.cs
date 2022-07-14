@@ -30,6 +30,15 @@ namespace UnitTests
         }
 
         [TestMethod]
+        public void ParserThrows_WhenTheExpressionIsIncompleted()
+        {
+            string input = "1";
+
+            SetMockToExtractNum(input, startPos: 0, endPos: 1, result: 1);
+
+            Assert.ThrowsException<WrongInputException>(() => parser.Parse(input));
+        }
+
         public void ParseProducesCorrectExpression_WhenTheInputHasNoWhiteSpace()
         {
             // Arange
@@ -38,10 +47,16 @@ namespace UnitTests
             SetMockToExtractNum(input, startPos: 0, endPos: 1, result: 1);
             SetMockToExtractNum(input, startPos: 2, endPos: 3, result: 5);
 
-            mock.Setup(e => e.ExtractOperationAt(input, 1)).Returns(Operation.Add);
+            mock.Setup(e => e.ExtractOperationAt(input, 1)).Returns(new Addition());
 
-            Expression expected = new Expression(1, Operation.Add, 5);
-
+            List<IExpressionPart> expressionParts = new()
+            {
+                new Operand(1),
+                new Operator(new Addition()),
+                new Operand(5)
+            };
+            Expression expected = new Expression(expressionParts);
+            
             // Act
             Expression expression = parser.Parse(input);
 
@@ -59,15 +74,21 @@ namespace UnitTests
             SetMockToExtractNum(trimedInput, startPos: 0, endPos: 1, result: 9);
             SetMockToExtractNum(trimedInput, startPos: 6, endPos: 7, result: 2);
 
-            mock.Setup(e => e.ExtractOperationAt(trimedInput, 3)).Returns(Operation.Multiply);
+            mock.Setup(e => e.ExtractOperationAt(trimedInput, 3)).Returns(new Multiplication());
 
-            Expression expected = new Expression(9, Operation.Multiply, 2);
+            List<IExpressionPart> expressionParts = new()
+            {
+                new Operand(9),
+                new Operator(new Multiplication()),
+                new Operand(2)
+            };
+            Expression expected = new Expression(expressionParts);
 
             // Act
             Expression expression = parser.Parse(input);
 
             // Assert
-            Assert.AreEqual(expected, expression);
+            Assert.That.ExpressionsAreEqual(expected, expression);
         }
 
         [TestMethod]
@@ -79,15 +100,21 @@ namespace UnitTests
             SetMockToExtractNum(input, startPos: 0, endPos: 4, result: 2.43);
             SetMockToExtractNum(input, startPos: 7, endPos: 11, result: 1.42);
 
-            mock.Setup(e => e.ExtractOperationAt(input, 5)).Returns(Operation.Divide);
+            mock.Setup(e => e.ExtractOperationAt(input, 5)).Returns(new Division());
 
-            Expression expected = new Expression(2.43, Operation.Divide, 1.42);
+            List<IExpressionPart> expressionParts = new()
+            {
+                new Operand(2.43),
+                new Operator(new Division()),
+                new Operand(1.42)
+            };
+            Expression expected = new Expression(expressionParts);
 
             // Act
             Expression expression = parser.Parse(input);
 
             // Assert
-            Assert.AreEqual(expected, expression);
+            Assert.That.ExpressionsAreEqual(expected, expression);
         }
 
         [TestMethod]
@@ -99,27 +126,51 @@ namespace UnitTests
             SetMockToExtractNum(input, startPos: 0, endPos: 4, result: 1.1);
             SetMockToExtractNum(input, startPos: 6, endPos: 10, result: -2);
 
-            mock.Setup(e => e.ExtractOperationAt(input, 5)).Returns(Operation.Divide);
+            mock.Setup(e => e.ExtractOperationAt(input, 5)).Returns(new Division());
 
-            Expression expected = new Expression(1.1, Operation.Divide, -2);
+            List<IExpressionPart> expressionParts = new()
+            {
+                new Operand(1.1),
+                new Operator(new Division()),
+                new Operand(-2)
+            };
+            Expression expected = new Expression(expressionParts);
 
             // Act
             Expression expression = parser.Parse(input);
 
             // Assert
-            Assert.AreEqual(expected, expression);
+            Assert.That.ExpressionsAreEqual(expected, expression);
         }
 
-        [TestMethod]
-        public void ParserThrows_WhenThereAreCharactersAfterThe2ndNum()
+        public void ParseProducesCorrectExpression_WhenTheInputIsLonger()
         {
-            string input = "1-1 1";
+            // Arange
+            string input = "1+5-3-2";
 
             SetMockToExtractNum(input, startPos: 0, endPos: 1, result: 1);
-            SetMockToExtractNum(input, startPos: 2, endPos: 3, result: 1);
-            mock.Setup(e => e.ExtractOperationAt(input, 1)).Returns(Operation.Subsract);
+            SetMockToExtractNum(input, startPos: 2, endPos: 3, result: 5);
+            SetMockToExtractNum(input, startPos: 4, endPos: 5, result: 3);
+            SetMockToExtractNum(input, startPos: 6, endPos: 7, result: 2);
+            mock.Setup(e => e.ExtractOperationAt(input, 1)).Returns(new Addition());
+            mock.Setup(e => e.ExtractOperationAt(input, 3)).Returns(new Substraction());
+            mock.Setup(e => e.ExtractOperationAt(input, 5)).Returns(new Substraction());
 
-            Assert.ThrowsException<WrongInputException>(() => parser.Parse(input));
+            List<IExpressionPart> expressionParts = new()
+            {
+                new Operand(1), new Operator(new Addition()),
+                new Operand(5), new Operator(new Substraction()),
+                new Operand(3), new Operator(new Substraction()),
+                new Operand(2)
+            };
+
+            Expression expected = new Expression(expressionParts);
+
+            // Act
+            Expression expression = parser.Parse(input);
+
+            // Assert
+            Assert.That.ExpressionsAreEqual(expected, expression);
         }
 
     }
