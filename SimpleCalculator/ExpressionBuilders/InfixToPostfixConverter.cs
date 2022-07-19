@@ -5,63 +5,132 @@ namespace Calculator.ExpressionBuilders
 {
     public class InfixToPostfixConverter
     {
+        private List<IExpressionPart> pfExpr;
+        private Stack<IExpressionPart> operators;
+
         public Expression Convert(Expression infixExpr)
         {
-            List<IExpressionPart> pfExpr = new List<IExpressionPart>();
-            Stack<Operator> operators = new Stack<Operator>();
+            pfExpr = new List<IExpressionPart>();
+            operators = new Stack<IExpressionPart>();
 
-            AssertEndOfExpressionIsNotReached(0, infixExpr);
-            ProceedOperand(infixExpr[0], ref pfExpr);
+            int pos = 0;
+            pos = ProccedLeftBrackets(infixExpr, pos);
+            pos = ProceedOperand(infixExpr, pos);
 
-            for (int i = 1; i < infixExpr.Count; i++)
+            while (pos < infixExpr.Count)
             {
-                ProceedOperator(infixExpr[i++], ref pfExpr, ref operators);
-                AssertEndOfExpressionIsNotReached(i, infixExpr);
-                ProceedOperand(infixExpr[i], ref pfExpr);         
+                pos = ProceedOperator(infixExpr, pos);
+                pos = ProccedLeftBrackets(infixExpr, pos);
+                
+                pos = ProceedOperand(infixExpr, pos);
+                pos = ProccedRightBrackets(infixExpr, pos);
             }
 
-            MoveOperatorsToTheList(Priority.Low, ref operators, ref pfExpr);
+            MoveHigherPriorityOperatorsToTheList(Priority.Low);
+
+            AssertOperatorsStackIsEmpty();
 
             return new Expression(pfExpr);
         }
 
-        private void ProceedOperand(IExpressionPart part, ref List<IExpressionPart> pfExpr)
+        private int ProceedOperand(Expression infixExpr, int pos)
         {
-            if (part is not Operand)
+            AssertEndOfExpressionIsNotReached(pos, infixExpr);
+
+            if (infixExpr[pos] is not Operand)
             {
                 throw new WrongInputException("The given expression is not a correct infix expression!"); 
             }
 
-            pfExpr.Add(part);
+            pfExpr.Add(infixExpr[pos]);
+
+            return ++pos;
         }
 
-        private void ProceedOperator(IExpressionPart part, ref List<IExpressionPart> pfExpr, ref Stack<Operator> operators)
+        private int ProceedOperator(Expression infixExpr, int pos)
         {
-            if (part is not Operator)
+            AssertEndOfExpressionIsNotReached(pos, infixExpr);
+
+            if (infixExpr[pos] is not Operator)
             {
                 throw new WrongInputException("The given expression is not a correct infix expression!");
             }
 
-            Operator operation = (Operator)part;
-            MoveOperatorsToTheList(operation.Priority, ref operators, ref pfExpr);
+            Operator operation = (Operator)infixExpr[pos];
+            MoveHigherPriorityOperatorsToTheList(operation.Priority);
             operators.Push(operation);
+
+            return ++pos;
         }
 
-        private void MoveOperatorsToTheList(Priority currOpPrior, ref Stack<Operator> operations, ref List<IExpressionPart> pfExpr)
+        private int ProccedLeftBrackets(Expression infixExpr, int pos)
         {
-            while (!IsEmpty(operations) && currOpPrior <= operations.Peek().Priority)
+            while(pos < infixExpr.Count && infixExpr[pos] is LeftBracket)
             {
-                pfExpr.Add(operations.Pop());
+                operators.Push(infixExpr[pos]);
+                pos++;
+            }
+
+            return pos;
+        }
+
+        private int ProccedRightBrackets(Expression infixExpr, int pos)
+        {
+            while (pos < infixExpr.Count && infixExpr[pos] is RightBracket)
+            {
+                MoveOperatorsToTheListUntilLeftBracket();
+                pos++;
+            }
+
+            return pos;
+        }
+
+        private void MoveHigherPriorityOperatorsToTheList(Priority currOpPrior)
+        {
+            while (IsNotEmpty(operators) && operators.Peek() is Operator operation)
+            {
+                if (currOpPrior <= operation.Priority)
+                {
+                    operators.Pop();
+                    pfExpr.Add(operation);
+                }
+                else
+                {
+                    break;
+                }
             }
         }
-        private bool IsEmpty(Stack<Operator> stack)
+
+        private void MoveOperatorsToTheListUntilLeftBracket()
         {
-            return stack.Count == 0;
+            while (IsNotEmpty(operators))
+            {
+                IExpressionPart part = operators.Pop();
+                if (part is LeftBracket)
+                {
+                    return;
+                }
+
+                pfExpr.Add(part);
+            }
+
+            throw new WrongInputException("Brackets missmatch!");
+        }
+        
+        private bool IsNotEmpty(Stack<IExpressionPart> stack)
+        {
+            return stack.Count > 0;
         }
 
-        private void AssertEndOfExpressionIsNotReached(int i, Expression expression)
+        private void AssertEndOfExpressionIsNotReached(int pos, Expression expression)
         {
-            if (i >= expression.Count)
+            if (pos >= expression.Count)
+                throw new WrongInputException("The given expression is not a correct infix expression!");
+        }
+
+        private void AssertOperatorsStackIsEmpty()
+        {
+            if (IsNotEmpty(operators))
                 throw new WrongInputException("The given expression is not a correct infix expression!");
         }
     }

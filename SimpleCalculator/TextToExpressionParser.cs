@@ -6,63 +6,67 @@ namespace Parser
 {
     public class TextToExpressionParser
     {
-        private readonly UnitExtracter extracter;
-        public TextToExpressionParser(UnitExtracter unitExtracter) { extracter = unitExtracter; }
+        private readonly Splitter splitter;
+        public TextToExpressionParser(Splitter splitter) { this.splitter = splitter; }
 
         public Expression Parse(string? input)
         {
-            if (input == null) throw new NoExpressionException();
-
-            return Split(input.Trim());
-        }
-
-        private Expression Split(string input)
-        {
-            int pos = 0;
-
-            List<IExpressionPart> expr = new List<IExpressionPart>();
-
-            ExtractOperand(input, ref pos, ref expr);
-            AssertNotReachedEndOfString(input, pos);
-
-            while (pos < input.Length)
+            if (String.IsNullOrEmpty(input))
             {
-                ExtractOperator(input, ref pos, ref expr);
-
-                ExtractOperand(input, ref pos, ref expr);
+                throw new NoExpressionException("Invalid input!");
             }
 
-            return new Expression(expr);
+            List<IExpressionPart> parts = splitter.Split(input);
+            ConvertOperatorsIntoNumberSigns(parts);
+
+            return new Expression(parts);
         }
 
-        private void ExtractOperand(string input, ref int pos, ref List<IExpressionPart> expr)
+        private void ConvertOperatorsIntoNumberSigns(List<IExpressionPart> parts)
         {
-            double number = extracter.ExtractNumberAt(input, ref pos);
-            Operand operand = new Operand(number);
-            expr.Add(operand);
+            if (parts.Count < 2)
+            {
+                return;
+            }    
 
-            SkipWhiteSpace(input, ref pos);
+            if (IsSignFollowedByOperand(parts, 0))
+            {
+                Replace(parts, 0);
+            }
+
+            for (int i = 1; i < parts.Count - 1; i++)
+            {
+                if (IsSignFollowedByOperand(parts, i) && parts[i-1] is Operator)
+                {
+                    Replace(parts, i);
+                }
+            }
         }
 
-        private void ExtractOperator(string input, ref int pos, ref List<IExpressionPart> expr)
+        private bool IsSignFollowedByOperand(List<IExpressionPart> parts, int index)
         {
-            IOperation operation = extracter.ExtractOperationAt(input, pos++);
-            Operator opr = new Operator(operation);
-            expr.Add(opr);
+            return IsSign(parts[index]) && parts[index + 1] is Operand;
+        }
+        private bool IsSign(IExpressionPart part)
+        {
+            if (part is Operator op)
+            {
+                return op.Type == Substraction.Symbol || op.Type == Addition.Symbol;
+            }
 
-            SkipWhiteSpace(input, ref pos);
+            return false;
         }
 
-        private void SkipWhiteSpace(string input, ref int pos)
+        private void Replace(List<IExpressionPart> parts, int index)
         {
-            while (pos < input.Length && input[pos] == ' ')
-                ++pos;
-        }
-
-        private void AssertNotReachedEndOfString(string input, int pos)
-        {
-            if (input.Length <= pos)
-                throw new WrongInputException("Invalid input!");
+            Operator operation = (Operator)parts[index];
+            parts.RemoveAt(index);
+            
+            if (operation.Type == Substraction.Symbol)
+            {
+                double number = ((Operand)parts[index]).Value * (-1);
+                parts[index] = new Operand(number);
+            }
         }
 
     }

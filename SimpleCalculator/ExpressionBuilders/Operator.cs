@@ -4,6 +4,7 @@ namespace Calculator.ExpressionBuilders
     public class Operator : IExpressionPart
     {
         private readonly IOperation operation;
+        public char Type => operation.Type;
         public Priority Priority => operation.Priority;
 
         public Operator(IOperation operation)

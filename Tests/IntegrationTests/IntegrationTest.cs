@@ -34,13 +34,13 @@ namespace IntergrationTests
         [TestMethod]
         public void RunWithInvalidExpression()
         {
-            RunTest(new List<string> { "1 + " }, "Invalid input!");
+            RunTest(new List<string> { "1 + " }, "The expression is not in a correct infix format!");
         }
 
         [TestMethod]
         public void RunWithInvalidOperationExpression()
         {
-            RunTest(new List<string> { "1,3 ^ 2,1" }, "\'^\' is not a valid operation!");
+            RunTest(new List<string> { "1,3 ^ 2,1" }, "Invalid input!");
         }
 
         [TestMethod]
@@ -82,6 +82,18 @@ namespace IntergrationTests
         public void RunWithLongerExpressionWithDifferentOperatorPriorities()
         {
             RunTest(new List<string> { "6 + 5 * 2 + 4 / 2 - 1 *-2 / 4 " }, "Result: 18,5");
+        }
+
+        [TestMethod]
+        public void RunWithExpressionContainingBrackets()
+        {
+            RunTest(new List<string> { "(((3*5-3) / (7 - 5)) + 1)" }, "Result: 7");
+        }
+
+        [TestMethod]
+        public void RunWithExpressionWithMissmatchedBrackets()
+        {
+            RunTest(new List<string> { "(1+5)) - 3" }, "The expression is not in a correct infix format: Brackets missmatch!");
         }
     }
 }

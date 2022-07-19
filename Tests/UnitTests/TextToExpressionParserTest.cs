@@ -5,21 +5,13 @@ namespace UnitTests
     [TestClass]
     public class TextToExpressionParserTest
     {
-        Mock<UnitExtracter> mock;
+        Mock<Splitter> mock;
         TextToExpressionParser parser;
-        delegate void ExtractNumberCallBack(string input, ref int pos);
-
-        private void SetMockToExtractNum(string input, int startPos, int endPos, double result)
-        {
-            mock.Setup(e => e.ExtractNumberAt(input, ref startPos))
-                .Callback(new ExtractNumberCallBack((string input, ref int startPos) => startPos = endPos))
-                .Returns(result);
-        }
 
         [TestInitialize]
         public void TestInit()
         {
-            mock = new Mock<UnitExtracter>();
+            mock = new Mock<Splitter>();
             parser = new TextToExpressionParser(mock.Object);
         }
 
@@ -30,59 +22,22 @@ namespace UnitTests
         }
 
         [TestMethod]
-        public void ParserThrows_WhenTheExpressionIsIncompleted()
-        {
-            string input = "1";
-
-            SetMockToExtractNum(input, startPos: 0, endPos: 1, result: 1);
-
-            Assert.ThrowsException<WrongInputException>(() => parser.Parse(input));
-        }
-
-        public void ParseProducesCorrectExpression_WhenTheInputHasNoWhiteSpace()
+        public void ParseProducesAnExpression()
         {
             // Arange
-            string input = "1+5";
-
-            SetMockToExtractNum(input, startPos: 0, endPos: 1, result: 1);
-            SetMockToExtractNum(input, startPos: 2, endPos: 3, result: 5);
-
-            mock.Setup(e => e.ExtractOperationAt(input, 1)).Returns(new Addition());
+            string input = "(12-5,4/";
 
             List<IExpressionPart> expressionParts = new()
             {
-                new Operand(1),
-                new Operator(new Addition()),
-                new Operand(5)
+                new LeftBracket(),
+                new Operand(12),
+                new Operator(new Substraction()),
+                new Operand(5.4),
+                new Operator(new Division())
             };
             Expression expected = new Expression(expressionParts);
             
-            // Act
-            Expression expression = parser.Parse(input);
-
-            // Assert
-            Assert.AreEqual(expected, expression);
-        }
-
-        [TestMethod]
-        public void ParseProducesCorrectExpression_WhenTheInputContainsWhiteSpace()
-        {
-            // Arange 
-            string input = "   9  *  2  ";
-            string trimedInput = input.Trim();
-
-            SetMockToExtractNum(trimedInput, startPos: 0, endPos: 1, result: 9);
-            SetMockToExtractNum(trimedInput, startPos: 6, endPos: 7, result: 2);
-
-            mock.Setup(e => e.ExtractOperationAt(trimedInput, 3)).Returns(new Multiplication());
-
-            List<IExpressionPart> expressionParts = new()
-            {
-                new Operand(9),
-                new Operator(new Multiplication()),
-                new Operand(2)
-            };
-            Expression expected = new Expression(expressionParts);
+            mock.Setup(s => s.Split(input)).Returns(expressionParts);
 
             // Act
             Expression expression = parser.Parse(input);
@@ -92,79 +47,37 @@ namespace UnitTests
         }
 
         [TestMethod]
-        public void ParseProducesCorrectExpression_WhenTheInputContainsDecimalNumbers()
-        {
-            // Arange 
-            string input = "2,43 / 1,42";
-
-            SetMockToExtractNum(input, startPos: 0, endPos: 4, result: 2.43);
-            SetMockToExtractNum(input, startPos: 7, endPos: 11, result: 1.42);
-
-            mock.Setup(e => e.ExtractOperationAt(input, 5)).Returns(new Division());
-
-            List<IExpressionPart> expressionParts = new()
-            {
-                new Operand(2.43),
-                new Operator(new Division()),
-                new Operand(1.42)
-            };
-            Expression expected = new Expression(expressionParts);
-
-            // Act
-            Expression expression = parser.Parse(input);
-
-            // Assert
-            Assert.That.ExpressionsAreEqual(expected, expression);
-        }
-
-        [TestMethod]
-        public void ParseProducesCorrectExpression_WhenTheNumbersContainSigns()
-        {
-            // Arange 
-            string input = "+1,1 /-2,0";
-
-            SetMockToExtractNum(input, startPos: 0, endPos: 4, result: 1.1);
-            SetMockToExtractNum(input, startPos: 6, endPos: 10, result: -2);
-
-            mock.Setup(e => e.ExtractOperationAt(input, 5)).Returns(new Division());
-
-            List<IExpressionPart> expressionParts = new()
-            {
-                new Operand(1.1),
-                new Operator(new Division()),
-                new Operand(-2)
-            };
-            Expression expected = new Expression(expressionParts);
-
-            // Act
-            Expression expression = parser.Parse(input);
-
-            // Assert
-            Assert.That.ExpressionsAreEqual(expected, expression);
-        }
-
-        public void ParseProducesCorrectExpression_WhenTheInputIsLonger()
+        public void ParseProducesCorrectExpression_WhenSquashingOperators()
         {
             // Arange
-            string input = "1+5-3-2";
-
-            SetMockToExtractNum(input, startPos: 0, endPos: 1, result: 1);
-            SetMockToExtractNum(input, startPos: 2, endPos: 3, result: 5);
-            SetMockToExtractNum(input, startPos: 4, endPos: 5, result: 3);
-            SetMockToExtractNum(input, startPos: 6, endPos: 7, result: 2);
-            mock.Setup(e => e.ExtractOperationAt(input, 1)).Returns(new Addition());
-            mock.Setup(e => e.ExtractOperationAt(input, 3)).Returns(new Substraction());
-            mock.Setup(e => e.ExtractOperationAt(input, 5)).Returns(new Substraction());
+            string input = "+12--5-2-+1";
 
             List<IExpressionPart> expressionParts = new()
             {
-                new Operand(1), new Operator(new Addition()),
-                new Operand(5), new Operator(new Substraction()),
-                new Operand(3), new Operator(new Substraction()),
-                new Operand(2)
+                new Operator(new Addition()),
+                new Operand(12),
+                new Operator(new Substraction()),
+                new Operator(new Substraction()),
+                new Operand(5),
+                new Operator(new Substraction()),
+                new Operand(2),
+                new Operator(new Substraction()),
+                new Operator(new Addition()),
+                new Operand(1)
             };
+            mock.Setup(s => s.Split(input)).Returns(expressionParts);
 
-            Expression expected = new Expression(expressionParts);
+            List<IExpressionPart> expectedParts = new()
+            {
+                new Operand(12),
+                new Operator(new Substraction()),
+                new Operand(-5),
+                new Operator(new Substraction()),
+                new Operand(2),
+                new Operator(new Substraction()),
+                new Operand(1)
+            };
+            Expression expected = new Expression(expectedParts);
 
             // Act
             Expression expression = parser.Parse(input);

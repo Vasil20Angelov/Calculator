@@ -3,6 +3,7 @@
     public class Division : IOperation
     {
         public const char Symbol = '/';
+        public char Type => Symbol;
         public Priority Priority => Priority.High;
         public double Apply(double num1, double num2)
         {
