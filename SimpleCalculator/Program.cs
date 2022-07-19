@@ -9,20 +9,23 @@ if (args.Length != 1)
     return;
 }
 
-UnitExtracter unitExtracter = new UnitExtracter();
-TextToExpressionParser parser = new TextToExpressionParser(unitExtracter);
+Splitter splitter = new Splitter();
+TextToExpressionParser parser = new TextToExpressionParser(splitter);
+InfixExpressionValidator validator = new InfixExpressionValidator();
 InfixToPostfixConverter converter = new InfixToPostfixConverter();
 SimpleCalculator calculator = new SimpleCalculator();
 
 try
 {
     Expression expression = parser.Parse(args[0]);
+    validator.Validate(expression);
     Expression postfixExpr = converter.Convert(expression);
 
     Console.WriteLine($"Result: {calculator.Calculate(postfixExpr).ToString("0.#####")}");
 }
 catch (Exception e) when (
-       e is WrongInputException
+       e is NoExpressionException
+    || e is WrongInputException
     || e is OverflowException
     || e is DivideByZeroException
     || e is UndefinedOperationException )

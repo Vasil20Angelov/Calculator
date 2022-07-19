@@ -16,13 +16,17 @@ namespace Calculator.Operations
         }
         public IOperation Create(char symbol)
         {
-            IOperation? operation = operations.GetValueOrDefault(symbol);
-            if (operation == null)
+            if (!OperationExists(symbol))
             {
                 throw new UndefinedOperationException($"\'{symbol}\' is not a valid operation!");
             }
 
-            return operation;         
+            return operations[symbol];         
+        }
+
+        public bool OperationExists(char symbol)
+        {
+            return operations.ContainsKey(symbol);
         }
     }
 }
