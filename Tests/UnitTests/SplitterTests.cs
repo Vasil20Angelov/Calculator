@@ -22,11 +22,11 @@
         [TestMethod]
         public void SplitReturnsAListFromExpressionParts_WhenTheInputContainsWhiteSpaces()
         {
-            string input = "  ( 1  + ()-  3         -*    ";
+            string input = "  ( 1  + ()^  3         -*    ";
             List<IExpressionPart> expected = new List<IExpressionPart>()
             {
                 new LeftBracket(), new Operand(1), new Operator(new Addition()),
-                new LeftBracket(), new RightBracket(), new Operator(new Substraction()),
+                new LeftBracket(), new RightBracket(), new Operator(new Exponentiation()),
                 new Operand(3), new Operator(new Substraction()), new Operator(new Multiplication())
             };
 

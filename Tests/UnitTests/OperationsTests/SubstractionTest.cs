@@ -12,6 +12,12 @@
         }
 
         [TestMethod]
+        public void AssociativityReturnsLeft()
+        {
+            Assert.AreEqual(Associativity.Left, substraction.Associativity);
+        }
+
+        [TestMethod]
         public void AppliesSubstraction()
         {
             double result = substraction.Apply(4.1, 1.2);

@@ -40,7 +40,7 @@ namespace IntergrationTests
         [TestMethod]
         public void RunWithInvalidOperationExpression()
         {
-            RunTest(new List<string> { "1,3 ^ 2,1" }, "Invalid input!");
+            RunTest(new List<string> { "1,3 . 2,1" }, "Invalid input!");
         }
 
         [TestMethod]
@@ -85,9 +85,15 @@ namespace IntergrationTests
         }
 
         [TestMethod]
+        public void RunWithStackedExponentialOperators()
+        {
+            RunTest(new List<string> { " 2+3^2^3/4^2 " }, "Result: 412,0625");
+        }
+
+        [TestMethod]
         public void RunWithExpressionContainingBrackets()
         {
-            RunTest(new List<string> { "(((3*5-3) / (7 - 5)) + 1)" }, "Result: 7");
+            RunTest(new List<string> { "(((3*5-3) / (7 - 5))^2 + 1)" }, "Result: 37");
         }
 
         [TestMethod]

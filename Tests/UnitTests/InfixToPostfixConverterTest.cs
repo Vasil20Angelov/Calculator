@@ -102,6 +102,39 @@
         }
 
         [TestMethod]
+        public void ConvertProducesCorrectExpression_WhenThereIsExponentiationOperator()
+        {
+            // Arange
+
+            // 1+5*3^2-5
+            List<IExpressionPart> infixParts = new()
+            {
+                new Operand(1), new Operator(new Addition()),
+                new Operand(5), new Operator(new Multiplication()),
+                new Operand(3), new Operator(new Exponentiation()),
+                new Operand(2), new Operator(new Substraction()),
+                new Operand(5)
+            };
+
+            List<IExpressionPart> pfParts = new()
+            {
+                new Operand(1), new Operand(5), new Operand(3), 
+                new Operand(2), new Operator(new Exponentiation()),
+                new Operator(new Multiplication()), new Operator(new Addition()),
+                new Operand(5), new Operator(new Substraction())
+            };
+
+            Expression infExpression = new Expression(infixParts);
+            Expression expected = new Expression(pfParts);
+
+            // Act
+            Expression expression = converter.Convert(infExpression);
+
+            // Assert
+            Assert.That.ExpressionsAreEqual(expected, expression);
+        }
+
+        [TestMethod]
         public void ConvertProducesCorrectExpression_WhenItContainsBrackets()
         {
             // Arange
@@ -164,6 +197,42 @@
 
             // Assert
             Assert.That.ExpressionsAreEqual(expected, expression);
+        }
+
+        [TestMethod]
+        public void ConvertsStackedExponentialOperators()
+        {
+            // 3+4*2/(1−5)^2^3
+            List<IExpressionPart> infixParts = new()
+            {
+                new Operand(3), new Operator(new Addition()),
+                new Operand(4), new Operator(new Multiplication()),
+                new Operand(2), new Operator(new Division()),
+                new LeftBracket(), new Operand(1), new Operator(new Substraction()),
+                new Operand(5), new RightBracket(), new Operator(new Exponentiation()),
+                new Operand(2), new Operator(new Exponentiation()), new Operand(3)
+            };
+
+            // 3 4 2 * 1 5 − 2 3 ^ ^ / +
+            List<IExpressionPart> pfParts = new()
+            {
+                new Operand(3), new Operand(4), new Operand(2),
+                new Operator(new Multiplication()), new Operand(1),
+                new Operand(5), new Operator(new Substraction()), 
+                new Operand(2), new Operand(3),
+                new Operator(new Exponentiation()), new Operator(new Exponentiation()),
+                new Operator(new Division()), new Operator(new Addition()),
+            };
+
+            Expression infExpression = new Expression(infixParts);
+            Expression expected = new Expression(pfParts);
+
+            // Act
+            Expression expression = converter.Convert(infExpression);
+
+            // Assert
+            Assert.That.ExpressionsAreEqual(expected, expression);
+
         }
 
         [TestMethod]

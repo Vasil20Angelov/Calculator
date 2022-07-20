@@ -12,6 +12,12 @@
         }
 
         [TestMethod]
+        public void AssociativityReturnsLeft()
+        {
+            Assert.AreEqual(Associativity.Left, multiplication.Associativity);
+        }
+
+        [TestMethod]
         public void AppliesMultiplication()
         {
             double result = multiplication.Apply(1.2, -2);
