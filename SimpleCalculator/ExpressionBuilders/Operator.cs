@@ -6,6 +6,7 @@ namespace Calculator.ExpressionBuilders
         private readonly IOperation operation;
         public char Type => operation.Type;
         public Priority Priority => operation.Priority;
+        public Associativity Associativity => operation.Associativity;
 
         public Operator(IOperation operation)
         {

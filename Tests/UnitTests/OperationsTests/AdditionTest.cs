@@ -12,6 +12,12 @@
         }
 
         [TestMethod]
+        public void AssociativityReturnsLeft()
+        {
+            Assert.AreEqual(Associativity.Left, addition.Associativity);
+        }
+
+        [TestMethod]
         public void AppliesAddition()
         {
             double result = addition.Apply(1.4, 2.3);

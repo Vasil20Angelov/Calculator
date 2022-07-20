@@ -12,6 +12,12 @@
         }
 
         [TestMethod]
+        public void AssociativityReturnsLeft()
+        {
+            Assert.AreEqual(Associativity.Left, division.Associativity);
+        }
+
+        [TestMethod]
         public void AppliesDivision()
         {
             double result = division.Apply(5, 2);

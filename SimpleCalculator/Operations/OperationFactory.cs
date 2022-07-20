@@ -11,7 +11,8 @@ namespace Calculator.Operations
                 { Addition.Symbol, new Addition() },
                 { Substraction.Symbol, new Substraction() },
                 { Multiplication.Symbol, new Multiplication() },
-                { Division.Symbol, new Division() }
+                { Division.Symbol, new Division() },
+                { Exponentiation.Symbol, new Exponentiation() }
             };
         }
         public IOperation Create(char symbol)

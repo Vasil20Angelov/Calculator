@@ -25,6 +25,22 @@
         }
 
         [TestMethod]
+        public void CalculatePostfixExpressionWithExponentialOperators()
+        {
+            // 3*4/2^3*2^2
+            List<IExpressionPart> expressionParts = new List<IExpressionPart>
+            {
+                new Operand(3), new Operand(4), new Operator(new Multiplication()),
+                new Operand(2), new Operand(3), new Operator(new Exponentiation()),               
+                new Operator(new Division()), new Operand(2), new Operand(2),
+                new Operator(new Exponentiation()), new Operator(new Multiplication())
+            };
+            Expression postfixExpression = new Expression(expressionParts);
+
+            Assert.AreEqual(6, calculator.Calculate(postfixExpression));
+        }
+
+        [TestMethod]
         public void CalculatePostfixExpressionThrows_WhenTheGivenExpressionIsInvalid()
         {
             // 1 + 4*2 - 3*/2

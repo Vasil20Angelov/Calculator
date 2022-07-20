@@ -26,7 +26,7 @@ namespace Calculator.ExpressionBuilders
                 pos = ProccedRightBrackets(infixExpr, pos);
             }
 
-            MoveHigherPriorityOperatorsToTheList(Priority.Low);
+            MoveHigherPriorityOperatorsToTheList(Priority.Low, Associativity.Left);
 
             AssertOperatorsStackIsEmpty();
 
@@ -57,10 +57,31 @@ namespace Calculator.ExpressionBuilders
             }
 
             Operator operation = (Operator)infixExpr[pos];
-            MoveHigherPriorityOperatorsToTheList(operation.Priority);
+            MoveHigherPriorityOperatorsToTheList(operation.Priority, operation.Associativity);
             operators.Push(operation);
 
             return ++pos;
+        }
+        private void MoveHigherPriorityOperatorsToTheList(Priority priority, Associativity associativity)
+        {
+            while (IsNotEmpty(operators) && operators.Peek() is Operator operation)
+            {
+                if (CanMoveOperator(priority, associativity, operation))
+                {
+                    operators.Pop();
+                    pfExpr.Add(operation);
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+        private bool CanMoveOperator(Priority priority, Associativity associativity, Operator operation)
+        {
+            return (priority < operation.Priority ||
+                    (priority == operation.Priority && associativity == Associativity.Left));
         }
 
         private int ProccedLeftBrackets(Expression infixExpr, int pos)
@@ -83,22 +104,6 @@ namespace Calculator.ExpressionBuilders
             }
 
             return pos;
-        }
-
-        private void MoveHigherPriorityOperatorsToTheList(Priority currOpPrior)
-        {
-            while (IsNotEmpty(operators) && operators.Peek() is Operator operation)
-            {
-                if (currOpPrior <= operation.Priority)
-                {
-                    operators.Pop();
-                    pfExpr.Add(operation);
-                }
-                else
-                {
-                    break;
-                }
-            }
         }
 
         private void MoveOperatorsToTheListUntilLeftBracket()
